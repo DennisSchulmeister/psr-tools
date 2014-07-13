@@ -299,8 +299,10 @@ def rearrange_registrations(banks, registration_map):
 
         for map_registration in map_bank["registrations"]:
             reg_number += 1
+            reg_empty = True
             reg_name = ""
             reg_size = 0
+            reg_head = b""
             reg_data = b""
 
             if map_registration["empty"]:
@@ -354,7 +356,11 @@ def write_banks(banks, output_dir):
     output directory will be a valid user data backup. This function ignores
     the header field from the registration list.
     '''
-    os.mkdir(output_dir)
+    already_exists = os.path.exists(output_dir)
+
+    if not already_exists:
+        os.mkdir(output_dir)
+
     registration_file = open(os.path.join(output_dir, "Regist.reg"), "wb")
     bank_files = []
     amount = 0
@@ -402,26 +408,27 @@ def write_banks(banks, output_dir):
 
     registration_file.close()
 
-    config_file = open(os.path.join(output_dir, "USERFILE.INI"), "wb")
-    config_file.write("[TITLE]\r\n")
-    config_file.write("9000Pro USERFILE.INI\r\n")
-    config_file.write("YAMAHA Corporation\r\n")
-    config_file.write("[DISK NO]\r\n")
-    config_file.write("DISK000\r\n")
-    config_file.write("[INSTRUMENT]\r\n")
-    config_file.write("9000Pro\r\n")
-    config_file.write("[VERSION]\r\n")
-    config_file.write("Ver2.06\r\n")
-    config_file.write("[TOTAL USER DATA SIZE]\r\n")
-    config_file.write("%sKB\r\n" % os.stat(os.path.join(output_dir, "Regist.reg")).st_size)
-    config_file.write("[REGISTRATION]\r\n")
-    config_file.write("TOTAL FILE NUM:%s\r\n" % len(bank_files))
+    if not already_exists:
+        config_file = open(os.path.join(output_dir, "USERFILE.INI"), "wb")
+        config_file.write("[TITLE]\r\n")
+        config_file.write("9000Pro USERFILE.INI\r\n")
+        config_file.write("YAMAHA Corporation\r\n")
+        config_file.write("[DISK NO]\r\n")
+        config_file.write("DISK000\r\n")
+        config_file.write("[INSTRUMENT]\r\n")
+        config_file.write("9000Pro\r\n")
+        config_file.write("[VERSION]\r\n")
+        config_file.write("Ver2.06\r\n")
+        config_file.write("[TOTAL USER DATA SIZE]\r\n")
+        config_file.write("%sKB\r\n" % os.stat(os.path.join(output_dir, "Regist.reg")).st_size)
+        config_file.write("[REGISTRATION]\r\n")
+        config_file.write("TOTAL FILE NUM:%s\r\n" % len(bank_files))
 
-    index = 0
+        index = 0
 
-    for bank_file in bank_files:
-        index += 1
-        config_file.write("%s = %s\r\n" % (index, bank_file))
+        for bank_file in bank_files:
+            index += 1
+            config_file.write("%s = %s\r\n" % (index, bank_file))
 
-    config_file.write("[DATAEND]\r\n")
-    config_file.close()
+        config_file.write("[DATAEND]\r\n")
+        config_file.close()
