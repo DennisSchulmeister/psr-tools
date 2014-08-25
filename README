@@ -1,0 +1,140 @@
+# psr-tools (http://www.patk.org/psr-tools)
+# © 2014  Dennis Schulmeister <dennis@patk.org>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+
+This is a collection of utility scripts to work with PSR-9000/9000pro files.
+Currently they can be used to assemble new registration banks and to patch
+registrations, provided you know which bytes need to be changed. See the
+-h or --help option of each script for further information.
+
+Website: http://www.patk.org/psr-tools
+Developers: https://code.patk.org/projects/psr-tools
+Mercurial ssh: ssh://hg@patk.org:4444/psr-tools
+
+
+--------------------------------------
+split_regs.py: Rearrange registrations
+--------------------------------------
+
+This program reads the registrations from a backup directory and creates a
+new backup with rearranged registrations, so registrations can be reordered
+to match a set list. The process goes like this:
+
+  1. Read backup and print a map of all contained registrations:
+  $ ./split_regs.py --split --input oldregs.usr --map regs.map
+
+  2. Edit the map file
+
+  3. Create new backup with reordered registrations:
+  $ ./split_regs.py --create --input old.usr --output new.usr --map regs.map
+
+NOTE: The program only works with user data backups. DISK/SCSI --> SAVE TO DISK.
+The new backups are loaded with DISK/SCSI --> LOAD FROM DISK.
+
+Here's an example of a map file:
+
+  03|N|Dennis 3
+  03|1|An der Cocacaban
+  03|2|One way wind
+  03|3|Stand by me
+  03|4|Let's Twist Agai
+  03|5|Johny B Goode
+  03|6|Blue suade shoes
+  03|7|Proud Mary
+  03|8|Oh my darling
+
+  04|N|Dennis 4
+  04|1|
+  04|2|
+  04|3|Quando Quando
+  04|4|Speedy Gonzales
+  04|5|Tequila EAV
+  04|6|Sugar (Archies)
+  04|7|Fly away DES
+  04|8|Die Fischer DES
+
+Each line contains three fields separated by the pipe symbol. The fields are:
+
+  1. Bank number
+  2. Registration number
+  3. Bank or registration name
+
+Empty lines are just for better reading but each block represents a registration
+bank with up to eight registrations. The first line of each bank is marked by
+the letter "N" in the second field. It contains the bank name, then. The other
+lines are registrations where the third field contains the registration name.
+Lines with no name (the third field is empty) mark empty banks or registrations.
+
+Now the lines can be moved around in order to edit the registrations. If you
+want to delete a registration simply delete its line. Change the name field
+if you want to rename banks or registrations. But be careful to not change
+the first two fields of registrations. Otherwise the program cannot find the
+original registrations to copy.
+
+The new map file could look like this:
+
+  05|N|Bank No. 5
+  03|1|COCACABANA
+  03|2|ONE WAY WIND
+  03|3|STAND BY ME
+  04|3|QUANDO QUANDO
+
+  -1|N|Bank No. 6
+  03|4|TWIST AGAIN
+  03|5|JOHNY B. GOODE
+  04|4|SPEEDY GONZALES
+
+  -1|N|Bank No. 7
+  03|6|BLUE SUADE SHOES
+  03|7|PROUD MARY
+  04|6|SUGAR (ARCHIES)
+  03|8|OH MY DARLING
+
+Just to show the difference all names have changed. As you can see it's not
+necessary that each bank contains exactly eight registrations. But it may never
+contain more than eight registrations. The first field of each bank may either
+contain a positive number or a negative numbers. Positive numbers are exact
+bank numbers like "create bank number 5 with the following name and content".
+Negative numbers are meant as relative numbers and -1 means "next bank". So
+if the previous bank has been bank number 5 the next one will be number 6 and
+so on. -2 would skip one bank and create bank number 7 instead.
+
+
+----------------------------------
+patch_regs.py: Patch registrations
+----------------------------------
+
+This is just a little utility to patch each registration inside a backup
+directory. It was mainly written to change the behavior of the expression pedal
+for all my registrations.
+
+First you need to find out which bytes need to be changed. Therefor create two
+identical registrations where just the one setting has been changed. Then make a
+user date backup (DISK/SCSI --> SAVE TO DISK) and copy it to your computer.
+Registrations are stored in the file Regist.reg inside the backup directory.
+Open it with a hex-editor or use hexdump to view its content.
+
+The registration files consists of two parts. The first 3088 bytes contain a
+directory of all registration banks. The remainder contains just the banks
+themselves. Each bank starts with a 16-byte field with its name followed by the
+magic string "PSR-9000PREGIST Ver1.00         ". After that the registrations
+follow: "REG000", "REG001", ..., "REG007". Registrations contains a 16-byte
+header followed by another 16-bytes for the name.
+
+Now compare two registrations and find out which bytes have changed. You need
+to find the offset including the REGxxx header. e.g. the volume pedal settings
+are stored as two bytes at offset 633 (0x19b). Once you have found out which
+bytes to change you can patch the registrations:
+
+  $ ./patch_regs.py --input old.usr --output new.usr --seek 633 --bytes 310f
+
+This will patch all non-empty registration by changing the two bytes starting
+at offset 633 (the first byte is counted as offset 0) to 0x31 0x0f. The original
+backup directory is not changed. Instead a new backup will be created.
+
+NOTE: The first 32 bytes cannot be patched. Results are undefined if you try
+this. The seek position must be decimal, the bytes must be hex-values.

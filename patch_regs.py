@@ -21,7 +21,7 @@ import psr9000.regbank as regbank
 
 def patch_banks(banks, start, new_bytes):
     '''
-    Takes an list of registration banks as created by read_banks(), an integer
+    Takes a list of registration banks as created by read_banks(), an integer
     offset and a bytes object. All non-empty registrations in all banks are
     patched accordingly.
     '''
