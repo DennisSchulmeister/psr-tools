@@ -97,7 +97,7 @@ The new map file could look like this:
 Just to show the difference all names have changed. As you can see it's not
 necessary that each bank contains exactly eight registrations. But it may never
 contain more than eight registrations. The first field of each bank may either
-contain a positive number or a negative numbers. Positive numbers are exact
+contain a positive number or a negative number. Positive numbers are exact
 bank numbers like "create bank number 5 with the following name and content".
 Negative numbers are meant as relative numbers and -1 means "next bank". So
 if the previous bank has been bank number 5 the next one will be number 6 and
@@ -114,15 +114,15 @@ for all my registrations.
 
 First you need to find out which bytes need to be changed. Therefor create two
 identical registrations where just the one setting has been changed. Then make a
-user date backup (DISK/SCSI --> SAVE TO DISK) and copy it to your computer.
+user data backup (DISK/SCSI --> SAVE TO DISK) and copy it to your computer.
 Registrations are stored in the file Regist.reg inside the backup directory.
 Open it with a hex-editor or use hexdump to view its content.
 
-The registration files consists of two parts. The first 3088 bytes contain a
+The registration file consists of two parts. The first 3088 bytes contain a
 directory of all registration banks. The remainder contains just the banks
 themselves. Each bank starts with a 16-byte field with its name followed by the
 magic string "PSR-9000PREGIST Ver1.00         ". After that the registrations
-follow: "REG000", "REG001", ..., "REG007". Registrations contains a 16-byte
+follow: "REG000", "REG001", …, "REG007". Registrations contain a 16-byte
 header followed by another 16-bytes for the name.
 
 Now compare two registrations and find out which bytes have changed. You need
