@@ -25,7 +25,7 @@ new backup with rearranged registrations, so registrations can be reordered
 to match a set list. The process goes like this:
 
   1. Read backup and print a map of all contained registrations:
-  $ ./split_regs.py --split --input oldregs.usr --map regs.map
+  $ ./split_regs.py --split --input old.usr --map regs.map
 
   2. Edit the map file
 
