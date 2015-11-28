@@ -250,10 +250,12 @@ def read_registration_map(map_file):
         if fields[1] == "N":
             append_current_bank()
 
-            if fields[0] < 0:
-                bank_number += (fields[0] * -1)
+            if not fields[0]:
+                bank_number = -1
+            elif int(fields[0]) < 0:
+                bank_number += (int(fields[0]) * -1)
             else:
-                bank_number = fields[0] - 1
+                bank_number = int(fields[0]) - 1
 
             current_bank = {
                 "number": bank_number,
