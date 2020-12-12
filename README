@@ -11,10 +11,6 @@ Currently they can be used to assemble new registration banks and to patch
 registrations, provided you know which bytes need to be changed. See the
 -h or --help option of each script for further information.
 
-Website: http://www.patk.org/psr-tools
-Developers: https://code.patk.org/projects/psr-tools
-Mercurial ssh: ssh://hg@patk.org:4444/psr-tools
-
 
 --------------------------------------
 split_regs.py: Rearrange registrations
